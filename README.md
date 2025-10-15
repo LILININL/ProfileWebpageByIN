@@ -9,7 +9,7 @@
 - ระบบนำทางใหม่แบบ Sidebar (Menubar) ทางซ้าย ใช้แทน TopBar เดิม และผูกกับสถานะล็อกอิน
   - แสดง/ซ่อนเมนูอัตโนมัติ: ผู้เยี่ยมชมเห็น Home/Contact/Login, ผู้ที่ล็อกอินแล้วเห็น Dashboard/Settings (Login จะหายไป)
   - ไฟล์: `src/components/Sidebar.jsx`, ผูกกับ `useStoredAuth()`
-- ธีมและพื้นหลัง統一: ทุกหน้าถูกจัดให้ใช้พื้นหลังเดียวกันและ glass‑card สไตล์เดียวกัน (Home, Dashboard, Settings, …)
+- ธีมและพื้นหลัง: ทุกหน้าถูกจัดให้ใช้พื้นหลังเดียวกันและ glass‑card สไตล์เดียวกัน (Home, Dashboard, Settings, …)
 - เปลี่ยนมาใช้ Tailwind utilities เต็มรูปแบบ ลด CSS แยกไฟล์ในหน้า เหลือเพียง utility ใน JSX
 - ปรับปรุง hook สถานะผู้ใช้ให้รีเฟรชทันทีเมื่อ login/logout (ไม่มีการรีโหลดหน้า)
   - โมดูลเก็บสถานะร่วม + pub/sub ภายใน hook: `src/hooks/useStoredAuth.js`
