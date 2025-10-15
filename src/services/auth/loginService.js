@@ -1,15 +1,17 @@
-import { buildApiUrl } from "../../config/apiConfig.js";
+import { buildApiUrl, API_PATHS } from "../../config/apiConfig.js";
 import { hashPassword } from "../security/passwordHash.js";
+import { validateLoginInput } from "./validators.js";
 
-export async function loginWithCredentials({ email, password }) {
-  const passwordDigest = await hashPassword(password);
+export async function loginWithCredentials(credentials) {
+  const payload = validateLoginInput(credentials);
+  const passwordDigest = await hashPassword(payload.password);
 
-  const response = await fetch(buildApiUrl("login"), {
+  const response = await fetch(buildApiUrl(API_PATHS.login), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ email, password: passwordDigest }),
+    body: JSON.stringify({ email: payload.email, password: passwordDigest }),
   });
 
   if (!response.ok) {

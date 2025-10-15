@@ -1,0 +1,31 @@
+:root {
+  --color-bg: #050505;
+  --color-bg-strong: #000000;
+  --color-surface: rgba(15, 15, 15, 0.92);
+  --color-surface-border: rgba(255, 255, 255, 0.08);
+  --color-surface-light: rgba(255, 255, 255, 0.04);
+  --color-text-primary: #f5f5f5;
+  --color-text-muted: rgba(255, 255, 255, 0.75);
+  --color-text-strong: rgba(255, 255, 255, 0.9);
+  --color-link: rgba(255, 255, 255, 0.8);
+  --color-link-hover: rgba(255, 255, 255, 1);
+
+  --color-accent: #766eef;
+  --color-accent-strong: #4a3edc;
+  --color-accent-shadow: rgba(84, 73, 237, 0.35);
+
+  --color-accent-secondary: #ff9770;
+  --color-accent-secondary-strong: #f76855;
+  --color-accent-secondary-shadow: rgba(239, 106, 85, 0.35);
+
+  --color-error-bg: rgba(255, 92, 92, 0.12);
+  --color-error-text: #ffb3b3;
+  --color-success-bg: rgba(76, 217, 100, 0.12);
+  --color-success-text: #bdf3cb;
+
+  --radius-card: 18px;
+  --radius-input: 12px;
+
+  --shadow-card: 0 24px 60px rgba(0, 0, 0, 0.35);
+  --shadow-button: 0 16px 30px var(--color-accent-shadow);
+}

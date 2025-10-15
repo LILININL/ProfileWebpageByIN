@@ -1,15 +1,21 @@
-import { buildApiUrl } from "../../config/apiConfig.js";
+import { buildApiUrl, API_PATHS } from "../../config/apiConfig.js";
 import { hashPassword } from "../security/passwordHash.js";
+import { validateRegisterInput } from "./validators.js";
 
-export async function registerWithCredentials({ name, email, password }) {
-  const passwordDigest = await hashPassword(password);
+export async function registerWithCredentials(input) {
+  const payload = validateRegisterInput(input);
+  const passwordDigest = await hashPassword(payload.password);
 
-  const response = await fetch(buildApiUrl("register"), {
+  const response = await fetch(buildApiUrl(API_PATHS.register), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ name, email, password: passwordDigest }),
+    body: JSON.stringify({
+      name: payload.name,
+      email: payload.email,
+      password: passwordDigest,
+    }),
   });
 
   if (!response.ok) {

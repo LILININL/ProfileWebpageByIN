@@ -1,17 +1,18 @@
-import { useLocation } from 'react-router-dom'
-import AppRoutes from './routes/AppRoutes.jsx'
-import './App.css'
+import { useLocation } from "react-router-dom";
+import AppRoutes from "./routes/AppRoutes.jsx";
+import Sidebar from "./components/Sidebar.jsx";
 
 function App() {
-  const location = useLocation()
+  const location = useLocation();
 
   return (
-    <div className="app-root">
-      <div className="route-container" key={location.pathname}>
+    <div className="flex min-h-screen bg-[var(--color-bg-strong)] text-[var(--color-text-primary)]">
+      <Sidebar />
+      <main className="flex-1 overflow-y-auto" key={location.pathname}>
         <AppRoutes />
-      </div>
+      </main>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

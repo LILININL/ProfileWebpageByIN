@@ -18,3 +18,9 @@ export const buildApiUrl = (path = "") => {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   return `${API_BASE_URL}${BASE_PATH_API}${normalizedPath}`;
 };
+
+export const API_PATHS = Object.freeze({
+  login: "/login",
+  register: "/register",
+  changePassword: "/change-password",
+});
