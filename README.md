@@ -2,13 +2,64 @@
 
 โปรเจ็กต์น้อย ๆ แต่ว่าใจ๋ใหญ่ ใช้ React กับ Vite ปั้นหน้าแลนดิ้ง ฟอร์มเข้าระบบ ฟอร์มสมัครสมาชิก (รหัสผ่านจะถูกแปลงเป็น SHA‑256 ก่อนส่ง) กับหน้าข้อมูลอีกกำเดียว โครงสร้างโค้ดจัดแยกเป็นสัดส่วน ดูแลง่ายขยายได้สะดวก ชุดนี้ตั้งใจ๋ให้เอาไปต่อยอดหรือก๊อปแนวไปลุยของตัวเอง
 
+## 🔄 อัปเดตครั้งล่าสุด (2025‑10‑15)
+
+สิ่งที่รีแฟกเตอร์และเพิ่มเข้ามาวันนี้ เพื่อให้โค้ดสะอาด ใช้งานง่าย และต่อยอดได้เร็ว:
+
+- ระบบนำทางใหม่แบบ Sidebar (Menubar) ทางซ้าย ใช้แทน TopBar เดิม และผูกกับสถานะล็อกอิน
+  - แสดง/ซ่อนเมนูอัตโนมัติ: ผู้เยี่ยมชมเห็น Home/Contact/Login, ผู้ที่ล็อกอินแล้วเห็น Dashboard/Settings (Login จะหายไป)
+  - ไฟล์: `src/components/Sidebar.jsx`, ผูกกับ `useStoredAuth()`
+- ธีมและพื้นหลัง統一: ทุกหน้าถูกจัดให้ใช้พื้นหลังเดียวกันและ glass‑card สไตล์เดียวกัน (Home, Dashboard, Settings, …)
+- เปลี่ยนมาใช้ Tailwind utilities เต็มรูปแบบ ลด CSS แยกไฟล์ในหน้า เหลือเพียง utility ใน JSX
+- ปรับปรุง hook สถานะผู้ใช้ให้รีเฟรชทันทีเมื่อ login/logout (ไม่มีการรีโหลดหน้า)
+  - โมดูลเก็บสถานะร่วม + pub/sub ภายใน hook: `src/hooks/useStoredAuth.js`
+  - รับ event เปลี่ยนค่าใน Local/Session storage ข้ามแท็บ
+- รวมเส้นทาง API ไว้ที่เดียว
+  - เพิ่ม `API_PATHS` ใน `src/config/apiConfig.js` และให้ service ทุกตัวเรียกผ่าน `buildApiUrl(API_PATHS.xxx)`
+- บริการเปลี่ยนรหัสผ่าน (service ใหม่)
+  - ไฟล์: `src/services/auth/changePasswordService.js`
+  - ขั้นตอน: validate → SHA‑256 (hex 64) ทั้งรหัสเดิม/ใหม่ → POST ไปที่ `API_PATHS.changePassword`
+  - ชื่อฟิลด์ตามหลังบ้าน: `{ email, old_password, new_password }`
+  - ดึงอีเมลจากสถานะล็อกอินเท่านั้น และป้องกันการใส่อีเมลปลอมจาก DevTools (ถ้ามี email ที่ส่งมาและไม่ตรง session จะ throw)
+  - เพิ่ม validator: `validateChangePasswordInput` ใน `src/services/auth/validators.js`
+- อัปเดตบริการเดิมให้ใช้เส้นทางกลาง
+  - `loginService.js` → `buildApiUrl(API_PATHS.login)`
+  - `registerService.js` → `buildApiUrl(API_PATHS.register)`
+- หน้า Settings (ใหม่)
+  - ไฟล์: `src/pages/Settings/Settings.jsx`
+  - แบบฟอร์มเปลี่ยนรหัสผ่านใช้ service ใหม่ พร้อมสถานะโหลด/ข้อความแจ้งผล
+  - โซนแก้ไขโปรไฟล์พร้อมตัวอัปโหลด/ครอปรูปโปรไฟล์
+- คอมโพเนนต์ AvatarEditor (ใหม่)
+  - ไฟล์: `src/components/AvatarEditor.jsx`
+  - อัปโหลดเฉพาะ `.jpg .png .gif`, ครอปวงกลมด้วย `react-easy-crop`, พรีวิววงกลม
+  - UX: คลิกที่วงกลม (มี overlay กล้อง) เพื่อเลือกไฟล์, เข้าโหมดครอปเต็มกรอบ, ปุ่ม “ยกเลิก/ใช้รูปนี้” แยกบรรทัด
+  - ยูทิลิตีครอปรูป: `src/utils/cropImage.js` (คืน `Blob` + `ObjectURL`) – พร้อมสำหรับต่อ API อัปโหลดภายหลัง
+
+ตัวอย่างการใช้ service เปลี่ยนรหัสผ่าน
+
+```ts
+import { changePassword } from "src/services/auth/changePasswordService";
+
+await changePassword({
+  currentPassword: "old-plain-text", // service จะ SHA-256 ให้ และตรวจ hex64 ก่อนส่ง
+  newPassword: "new-plain-text",
+  confirmPassword: "new-plain-text",
+});
+```
+
+ตำแหน่งไฟล์ที่เกี่ยวข้องกับ API
+
+- คอนฟิกและเส้นทางกลาง: `src/config/apiConfig.js` (มี `API_PATHS` และ `buildApiUrl()`)
+- บริการ: `src/services/auth/*.js`
+- ตัวแฮช: `src/services/security/passwordHash.js`
+
 ## ✨ ของเด่นในโปรเจ็กต์
 
 - **สแต็กใหม่ขะหนาด**: React 18 + Vite พร้อมปลั๊กอิน Fast Refresh อย่างเป็นทางการ
 - **เส้นทางชัดเจน**: ใช้ `src/routes/AppRoutes.jsx` พาไปหน้า Home, Is Me, Contact, Login, Register ตามลำดับ
-- **บริการ Auth เล็ก ๆ**: อยู่ใน `src/services/auth` ช่วยแฮชรหัสผ่านเป็น SHA‑256 ก่อนไปหา API
-- **ตั้งค่า API ง่าย**: ไฟล์ `src/config/apiConfig.js` รับค่า `VITE_API_BASE_URL` กับ `VITE_BASE_PATH_API` แล้วจัดการเรียบ
-- **สไตล์วางคู่คอมโพเนนต์**: แต่ละหน้าใน `src/pages` มีไฟล์ CSS ของจะอี้ ไม่ต้องพึ่ง Styled-components หรือ CSS module
+- **บริการ Auth แยกชั้น**: `src/services/auth` แฮชรหัสผ่าน SHA‑256 ก่อนเรียก API และใช้เส้นทางกลางจาก `API_PATHS`
+- **ตั้งค่า API ง่าย**: `src/config/apiConfig.js` มี `API_BASE_URL`, `BASE_PATH_API`, `API_PATHS`, `buildApiUrl()`
+- **สไตล์ด้วย Tailwind ล้วน**: ใช้ utility class เป็นหลัก (ลบ CSS แยกหน้าเดิมออก) และธีมพื้นหลัง統一
 
 ## 🚀 จะเริ่มต้นยังไง
 
@@ -43,26 +94,41 @@ VITE_BASE_PATH_API=/auth
 
 ```
 src/
-├─ App.jsx              # โครงหลักของหน้า + container สำหรับ Router
-├─ App.css              # สไตล์พื้น ๆ กับแอนิเมชัน
+├─ App.jsx                 # โครงหลัก + ใส่ Sidebar เป็น layout ทั่วแอป
+├─ components/
+│  ├─ Sidebar.jsx          # เมนูทางซ้าย แสดง/ซ่อนตามสถานะล็อกอิน
+│  └─ AvatarEditor.jsx     # อัปโหลด/ครอปรูปโปรไฟล์ (วงกลม)
 ├─ config/
-│  └─ apiConfig.js      # ตัวช่วยสร้าง URL สำหรับ API
+│  └─ apiConfig.js         # API_BASE_URL, BASE_PATH_API, API_PATHS, buildApiUrl
+├─ hooks/
+│  └─ useStoredAuth.js     # auth store + pub/sub รีเฟรช UI ทันทีที่ login/logout
 ├─ pages/
-│  ├─ Home/             # หน้าแรกมีปุ่มเรียกไปหน้าต่าง ๆ
-│  ├─ Login/            # ฟอร์มเข้าสู่ระบบ + แฮชรหัสผ่าน
-│  ├─ Register/         # ฟอร์มสมัครสมาชิก ใช้แฮชเดียวกัน
-│  ├─ Contact/          # หน้าเอาไว้ใส่ข้อมูลติดต่อ
-│  └─ IsMe/             # หน้าเล่าเรื่องตั๋วเก่า (About Me)
+│  ├─ Home/                # แลนดิ้ง + CTA
+│  ├─ Login/               # ฟอร์มเข้าสู่ระบบ (แฮช SHA‑256 ก่อนส่ง)
+│  ├─ Register/            # ฟอร์มสมัครสมาชิก (แฮชเหมือนกัน)
+│  ├─ Dashboard/           # ตัวอย่างการ์ด/รายละเอียด พร้อมธีมใหม่
+│  ├─ Settings/            # ตั้งชื่อแสดง เปลี่ยนรหัสผ่าน ออกจากระบบ
+│  ├─ Contact/             # ติดต่อ
+│  └─ IsMe/                # About
 ├─ routes/
-│  └─ AppRoutes.jsx     # ไฟล์รวมเส้นทางของ React Router
+│  └─ AppRoutes.jsx        # รวมเส้นทางทั้งหมด
 └─ services/
-   ├─ auth/             # ฟังก์ชันเรียก API Login / Register
-   └─ security/         # ตัวแฮชรหัสผ่าน SHA‑256
+   ├─ auth/
+   │  ├─ loginService.js             # buildApiUrl(API_PATHS.login)
+   │  ├─ registerService.js          # buildApiUrl(API_PATHS.register)
+   │  ├─ changePasswordService.js    # buildApiUrl(API_PATHS.changePassword)
+   │  ├─ validators.js               # รวม validator (เพิ่ม validateChangePasswordInput)
+   │  └─ authStorage.js              # เก็บ/อ่านสถานะล็อกอิน (session/cookie)
+   └─ security/
+      └─ passwordHash.js             # SHA‑256 → hex 64 ตัว
 ```
 
-## 🔐 โน้ตเกี่ยวกับฟลว์เข้าสู่ระบบ
+## 🔐 โน้ตเกี่ยวกับ Auth / Security
 
-- ทั้งฟอร์ม Login กับ Register จะเรียก `hashPassword` เพื่อแปลงรหัสผ่านเป็น SHA‑256 ก่อนใส่ JSON ให้ API
+- Login/Register ส่งรหัสผ่านเป็น SHA‑256 (hex 64)
+- Change password ส่ง `{ email, old_password, new_password }` โดย:
+  - email มาจากสถานะล็อกอินเท่านั้น (กันผู้ใช้แก้ email เอง)
+  - ทั้ง old/new เป็น SHA‑256 (hex 64) และตรวจรูปแบบก่อนส่ง
 - หลังบ้านเลือกได้สองทาง:
   - รับค่า SHA‑256 นั้นไปเข้ากับ bcrypt/Argon2 อีกชั้นแล้วเทียบกับที่เก็บไว้
   - หรือเก็บ bcrypt ของ SHA‑256 ตั้งแต่ตอนสมัคร แล้วตอนล็อกอินก็ใช้วิธีเดียวกัน
@@ -136,7 +202,7 @@ src/
 - ฝั่งหลังบ้านควรเลือกหนึ่งในสองแนวทาง:
   - นำค่า SHA‑256 ที่รับมาไปเข้าบล็อก bcrypt/Argon2 อีกชั้นเพื่อเทียบกับที่เก็บไว้
   - หรือเก็บ bcrypt ของ SHA‑256 ตั้งแต่ขั้นตอนสมัครสมาชิก แล้วตอนเข้าสู่ระบบก็แฮชเทียบด้วยวิธีเดียวกัน
-- โปรดเสิร์ฟแอปนี้ผ่าน HTTPS เสมอในโปรดักชัน การแฮชฝั่ง client เป็นเพียงการปิดบัง ไม่ใช่การแทนที่ TLS
+- โปรดเสิร์ฟผ่าน HTTPS เสมอในโปรดักชัน การแฮชฝั่ง client เป็นเพียงการปกปิด ไม่แทนที่ TLS
 
 ## 📦 สคริปต์ที่ใช้บ่อย
 
