@@ -48,7 +48,7 @@ jobs:
         id: version
         run: |
           LAST_TAG=$(git tag --list 'v*.*.*' --sort=-v:refname | head -n 1)
-          f [ -z "$LAST_TAG" ]; then
+          if [ -z "$LAST_TAG" ]; then
             MAJOR=1
             MINOR=0
             PATCH=0
