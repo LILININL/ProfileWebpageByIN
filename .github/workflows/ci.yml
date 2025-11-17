@@ -79,8 +79,7 @@ jobs:
                   name: Release ${{ steps.version.outputs.TAG }}
                   draft: false
                   prerelease: false
-                  generate_release_notes: true
                   body_path: CHANGELOG.md
-                  body: ${{ steps.changelog.outputs.changelog }}
+
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
