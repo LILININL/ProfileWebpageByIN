@@ -1,63 +1,84 @@
 name: Release-reusable
 
 on:
-    workflow_call:
+  workflow_call:
 
 jobs:
-    release:
-        runs-on: ubuntu-latest
+  release:
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "20"
-                  cache: "npm"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
 
-            - name: Install dependencies
-              run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-            - name: Build Vite app
-              run: npm run build
+      - name: Build Vite app
+        run: npm run build
 
-            - name: Generate changelog
-              id: changelog
-              run: |
-                  PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)
-                  echo "Previous tag: $PREV_TAG"
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)
+          echo "Previous tag: $PREV_TAG"
 
-                  {
-                    echo "## Changelog"
-                    echo
-                    echo "Changes since $PREV_TAG:"
-                    echo
-                    git log -1 --pretty=format:'%s%n%n%b'
-                    echo
-                    echo "---"
-                    echo
-                    echo "Deployed page:"
-                    echo "https://lilininl.github.io/ProfileWebpageByIN/"
-                  } > CHANGELOG.md
+          {
+            echo "## Changelog"
+            echo
+            echo "Changes since $PREV_TAG:"
+            echo
+            git log -1 --pretty=format:'%s%n%n%b'
+            echo
+            echo "---"
+            echo
+            echo "Deployed page:"
+            echo "https://lilininl.github.io/ProfileWebpageByIN/"
+          } > CHANGELOG.md
 
-            - name: Prepare version tag
-              id: version
-              run: |
-                  N=$((GITHUB_RUN_NUMBER-1))
-                  MAJOR=$((1 + N/100))
-                  MINOR=$(((N/10)%10))
-                  PATCH=$((N%10))
-                  echo "TAG=v${MAJOR}.${MINOR}.${PATCH}" >> $GITHUB_OUTPUT
+      - name: Prepare version tag
+        id: version
+        run: |
+          LAST_TAG=$(git tag --list 'v*.*.*' --sort=-v:refname | head -n 1)
+          f [ -z "$LAST_TAG" ]; then
+            MAJOR=1
+            MINOR=0
+            PATCH=0
+          else
+            echo "Last tag: $LAST_TAG"
+            VERSION=${LAST_TAG#v}
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+            if [ "$PATCH" -lt 9 ]; then
+              PATCH=$((PATCH + 1))
+            else
+              PATCH=0
+              if [ "$MINOR" -lt 9 ]; then
+                MINOR=$((MINOR + 1))
+              else
+                MINOR=0
+                MAJOR=$((MAJOR + 1))
+              fi
+            fi
+          fi
+          NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "New tag: $NEW_TAG"
+          echo "TAG=$NEW_TAG" >> $GITHUB_OUTPUT
 
-            - name: Create GitHub Release
-              uses: softprops/action-gh-release@v2
-              with:
-                  tag_name: ${{ steps.version.outputs.TAG }}
-                  name: Release ${{ steps.version.outputs.TAG }}
-                  draft: false
-                  prerelease: false
-                  body_path: CHANGELOG.md
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.TAG }}
+          name: Release ${{ steps.version.outputs.TAG }}
+          draft: false
+          prerelease: false
+          body_path: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
