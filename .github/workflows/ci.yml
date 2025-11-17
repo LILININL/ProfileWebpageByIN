@@ -70,6 +70,10 @@ jobs:
                   echo "version: v${MAJOR}.${MINOR}.${PATCH}"
                   echo "TAG=v${MAJOR}.${MINOR}.${PATCH}" >> $GITHUB_OUTPUT
 
+            - name: Create dist archive
+              if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+              run: zip -r dist.zip dist
+
             - name: Create GitHub Release
               if: github.event_name == 'push' && github.ref == 'refs/heads/main'
               uses: softprops/action-gh-release@v2
@@ -79,6 +83,6 @@ jobs:
                   draft: false
                   prerelease: false
                   body_path: CHANGELOG.md
-
+                  files: dist.zip
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
