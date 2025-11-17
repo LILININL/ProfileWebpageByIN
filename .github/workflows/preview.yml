@@ -1,0 +1,39 @@
+name: Deploy PR preview
+
+concurrency: preview-${{ github.ref }}
+
+on:
+    pull_request:
+        types:
+            - opened
+            - reopened
+            - synchronize
+            - closed
+
+jobs:
+    deploy-preview:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: "npm"
+
+            - name: Install and Build
+              if: github.event.action != 'closed'
+              run: |
+                  npm ci
+                  npm run build
+
+            - name: Deploy PR preview to GitHub Pages
+              uses: rossjrw/pr-preview-action@v1
+              with:
+                  source-dir: ./dist
+                  preview-branch: gh-pages
+                  umbrella-dir: pr-preview
+                  action: auto
