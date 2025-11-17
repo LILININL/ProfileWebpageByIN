@@ -60,6 +60,6 @@ jobs:
                   name: Release ${{ steps.version.outputs.TAG }}
                   draft: false
                   prerelease: false
-                  body: Automated release for ${{ steps.version.outputs.TAG }}
+                  generate_release_notes: true
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
