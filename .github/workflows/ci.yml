@@ -36,6 +36,25 @@ jobs:
             - name: Build Vite app
               run: npm run build
 
+            - name: Generate changelog
+              id: changelog
+              run: |
+                  # หา tag ก่อนหน้า (ถ้าไม่มี จะ fallback เป็น initial commit)
+                  PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)
+                  echo "Previous tag: $PREV_TAG"
+
+                  echo "## Changelog" > CHANGELOG.md
+                  echo "" >> CHANGELOG.md
+                  echo "Changes since $PREV_TAG:" >> CHANGELOG.md
+                  echo "" >> CHANGELOG.md
+
+                  git log --pretty=format:'- %s (%h)' $PREV_TAG..HEAD >> CHANGELOG.md
+
+                  echo "changelog<<EOF" >> $GITHUB_OUTPUT
+                  cat CHANGELOG.md >> $GITHUB_OUTPUT
+                  echo "" >> $GITHUB_OUTPUT
+                  echo "EOF" >> $GITHUB_OUTPUT
+
             - name: Upload dist as artifact
               uses: actions/upload-artifact@v4
               with:
