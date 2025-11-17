@@ -42,11 +42,24 @@ jobs:
                   name: vite-build
                   path: dist
 
+            - name: Prepare version tag
+              id: version
+              run: |
+                  N=$((GITHUB_RUN_NUMBER-1))
+                  MAJOR=$((1 + N/100))
+                  MINOR=$(((N/10)%10))
+                  PATCH=$((N%10))
+                  echo "version: v${MAJOR}.${MINOR}.${PATCH}"
+                  echo "TAG=v${MAJOR}.${MINOR}.${PATCH}" >> $GITHUB_OUTPUT
+
             - name: Create GitHub Release
+              if: github.event_name == 'push' && github.ref == 'refs/heads/main'
               uses: softprops/action-gh-release@v2
               with:
-                  tag_name: ${{ github.ref_name }}
-                  name: Release ${{ github.ref_name }}
+                  tag_name: ${{ steps.version.outputs.TAG }}
+                  name: Release ${{ steps.version.outputs.TAG }}
                   draft: false
-                  files: dist/**
                   prerelease: false
+                  body: Automated release for ${{ steps.version.outputs.TAG }}
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
