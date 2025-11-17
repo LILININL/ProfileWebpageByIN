@@ -41,7 +41,7 @@ jobs:
             echo "---"
             echo
             echo "Deployed page:"
-            echo "https://lilininl.github.io/ProfileWebpageByIN/"
+            echo "https://lilininl.github.io"
           } > CHANGELOG.md
 
       - name: Prepare version tag
