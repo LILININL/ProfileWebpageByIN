@@ -1,88 +1,83 @@
 name: INControllerCI
 
 on:
-    push:
-        branches:
-            - main
-        tags:
-            - "v*"
-    pull_request:
-        branches:
-            - main
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - main
 
 jobs:
-    build-and-test:
-        runs-on: ubuntu-latest
+  build-and-test:
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "20"
-                  cache: "npm"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
 
-            - name: Install dependencies
-              run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-            - name: Run lint (if exists)
-              run: npm run lint --if-present
+      - name: Run lint (if exists)
+        run: npm run lint --if-present
 
-            - name: Run tests (if exists)
-              run: npm run test --if-present
+      - name: Run tests (if exists)
+        run: npm run test --if-present
 
-            - name: Build Vite app
-              run: npm run build
+      - name: Build Vite app
+        run: npm run build
 
-            - name: Generate changelog
-              id: changelog
-              run: |
-                  PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)
-                  echo "Previous tag: $PREV_TAG"
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)
+          echo "Previous tag: $PREV_TAG"
 
-                  echo "## Changelog" > CHANGELOG.md
-                  echo "" >> CHANGELOG.md
-                  echo "Changes since $PREV_TAG:" >> CHANGELOG.md
-                  echo "" >> CHANGELOG.md
+          echo "## Changelog" > CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "Changes since $PREV_TAG:" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
 
-                  git log -1 --pretty=format:'- %s (%h)' >> CHANGELOG.md
+          git log -1 --pretty=format:'%s%n%n%b' >> CHANGELOG.md
 
-                  echo "changelog<<EOF" >> $GITHUB_OUTPUT
-                  cat CHANGELOG.md >> $GITHUB_OUTPUT
-                  echo "" >> $GITHUB_OUTPUT
-                  echo "EOF" >> $GITHUB_OUTPUT
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          cat CHANGELOG.md >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
-            - name: Upload dist as artifact
-              uses: actions/upload-artifact@v4
-              with:
-                  name: vite-build
-                  path: dist
+      - name: Upload dist as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vite-build
+          path: dist
 
-            - name: Prepare version tag
-              id: version
-              run: |
-                  N=$((GITHUB_RUN_NUMBER-1))
-                  MAJOR=$((1 + N/100))
-                  MINOR=$(((N/10)%10))
-                  PATCH=$((N%10))
-                  echo "version: v${MAJOR}.${MINOR}.${PATCH}"
-                  echo "TAG=v${MAJOR}.${MINOR}.${PATCH}" >> $GITHUB_OUTPUT
+      - name: Prepare version tag
+        id: version
+        run: |
+          N=$((GITHUB_RUN_NUMBER-1))
+          MAJOR=$((1 + N/100))
+          MINOR=$(((N/10)%10))
+          PATCH=$((N%10))
+          echo "version: v${MAJOR}.${MINOR}.${PATCH}"
+          echo "TAG=v${MAJOR}.${MINOR}.${PATCH}" >> $GITHUB_OUTPUT
 
-            - name: Create dist archive
-              if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-              run: zip -r dist.zip dist
-
-            - name: Create GitHub Release
-              if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-              uses: softprops/action-gh-release@v2
-              with:
-                  tag_name: ${{ steps.version.outputs.TAG }}
-                  name: Release ${{ steps.version.outputs.TAG }}
-                  draft: false
-                  prerelease: false
-                  body_path: CHANGELOG.md
-                  files: dist.zip
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create GitHub Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.TAG }}
+          name: Release ${{ steps.version.outputs.TAG }}
+          draft: false
+          prerelease: false
+          body_path: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
