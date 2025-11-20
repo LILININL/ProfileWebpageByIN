@@ -29,7 +29,7 @@ function Home() {
             {
               title: "Dashboard",
               description:
-                "พื้นที่จัดการข้อมูลหลังบ้าน ตกแต่งด้วยการ์ดแบบ glassmorphism",
+                "พื้นที่จัดการข้อมูลหลังบ้าน ตกแต่งด้วยการ์ดแบบ glassmorphism ",
             },
           ].map((item) => (
             <div
