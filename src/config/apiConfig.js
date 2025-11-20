@@ -1,8 +1,15 @@
-const rawApiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "why.whylin.xyz";
+const rawApiBaseUrl =
+  import.meta.env.VITE_API_BASE_URL ?? "https://why.whylin.xyz";
 
 const rawBasePathApi = import.meta.env.VITE_BASE_PATH_API ?? "/auth";
 
-export const API_BASE_URL = rawApiBaseUrl.replace(/\/+$/, "");
+const normalizeApiBaseUrl = (url) => {
+  const trimmed = String(url).trim().replace(/\/+$/, "");
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+};
+
+export const API_BASE_URL = normalizeApiBaseUrl(rawApiBaseUrl);
 
 const ensureLeadingSlash = rawBasePathApi.startsWith("/")
   ? rawBasePathApi

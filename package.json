@@ -10,10 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@samkirkland/ftp-deploy": "^1.2.5",
     "@tailwindcss/vite": "^4.1.14",
-    "react-easy-crop": "^5.0.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-easy-crop": "^5.0.6",
     "react-router-dom": "^7.9.3",
     "tailwindcss": "^4.1.14"
   },
