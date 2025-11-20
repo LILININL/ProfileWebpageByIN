@@ -1,5 +1,4 @@
-const rawApiBaseUrl =
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+const rawApiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "why.whylin.xyz";
 
 const rawBasePathApi = import.meta.env.VITE_BASE_PATH_API ?? "/auth";
 
