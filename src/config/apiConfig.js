@@ -1,5 +1,6 @@
 const rawApiBaseUrl =
-  import.meta.env.VITE_API_BASE_URL ?? "https://why.whylin.xyz";
+  import.meta.env.VITE_API_BASE_URL ??
+  "https://fristgoapi-652162254402.us-central1.run.app";
 
 const rawBasePathApi = import.meta.env.VITE_BASE_PATH_API ?? "/auth";
 
