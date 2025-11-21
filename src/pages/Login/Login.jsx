@@ -4,6 +4,7 @@ import { loginWithCredentials } from "../../services/auth/loginService.js";
 import { useFormController } from "../../hooks/useFormController.js";
 import { useStoredAuth } from "../../hooks/useStoredAuth.js";
 import backgroundImage from "../../assets/87164382_p0.jpg";
+import { appVersion } from "../../config/version.js";
 
 function Login() {
   const navigate = useNavigate();
@@ -41,10 +42,15 @@ function Login() {
       />
       <div className="relative z-10 flex w-full max-w-xl flex-col gap-8 text-white">
         <div className="space-y-3 text-center">
-          <p className="text-xs uppercase tracking-[0.4em] text-white/50">เข้าสู่ระบบ</p>
-          <h1 className="text-4xl font-semibold md:text-5xl">ยินดีต้อนรับกลับ</h1>
+          <p className="text-xs uppercase tracking-[0.4em] text-white/50">
+            เข้าสู่ระบบ
+          </p>
+          <h1 className="text-4xl font-semibold md:text-5xl">
+            ยินดีต้อนรับกลับ
+          </h1>
           <p className="text-sm leading-relaxed text-white/75 md:text-base">
-            ใช้อีเมลและรหัสผ่านเพื่อเข้าสู่ระบบ และบันทึกการตั้งค่าใน Dashboard ของคุณ
+            ใช้อีเมลและรหัสผ่านเพื่อเข้าสู่ระบบ และบันทึกการตั้งค่าใน Dashboard
+            ของคุณ
           </p>
         </div>
 
@@ -94,10 +100,16 @@ function Login() {
               </label>
               <span>
                 ยังไม่มีบัญชี?{" "}
-                <Link className="font-semibold text-indigo-300 hover:text-indigo-200" to="/register">
+                <Link
+                  className="font-semibold text-indigo-300 hover:text-indigo-200"
+                  to="/register"
+                >
                   สมัครสมาชิก
                 </Link>
               </span>
+            </div>
+            <div className="mt-4 text-end text-xs text-white/50 font-serif">
+              <span>version {appVersion}</span>
             </div>
           </form>
 

@@ -22,28 +22,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Vite app
-        run: npm run build
-
-      - name: Generate changelog
-        id: changelog
-        run: |
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)
-          echo "Previous tag: $PREV_TAG"
-
-          {
-            echo "## Changelog"
-            echo
-            echo "Changes since $PREV_TAG:"
-            echo
-            git log -1 --pretty=format:'%s%n%n%b'
-            echo
-            echo "---"
-            echo
-            echo "Deployed page:"
-            echo "https://whylin.xyz/"
-          } > CHANGELOG.md
-
       - name: Prepare version tag
         id: version
         run: |
@@ -71,6 +49,30 @@ jobs:
           NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
           echo "New tag: $NEW_TAG"
           echo "TAG=$NEW_TAG" >> $GITHUB_OUTPUT
+
+      - name: Build Vite app
+        env:
+          VITE_APP_VERSION: ${{ steps.version.outputs.TAG }}
+        run: npm run build
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)
+          echo "Previous tag: $PREV_TAG"
+
+          {
+            echo "## Changelog"
+            echo
+            echo "Changes since $PREV_TAG:"
+            echo
+            git log -1 --pretty=format:'%s%n%n%b'
+            echo
+          echo "---"
+          echo
+          echo "Deployed page:"
+          echo "https://whylin.xyz/"
+          } > CHANGELOG.md
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
