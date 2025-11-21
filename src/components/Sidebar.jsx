@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useStoredAuth } from "../hooks/useStoredAuth.js";
 
-const baseItems = [
+const BasePath = [
   {
     id: "home",
     path: "/",
@@ -74,12 +74,12 @@ function Sidebar() {
   const navigate = useNavigate();
   const { authUser } = useStoredAuth();
 
-  const items = useMemo(() => {
-    return baseItems.filter((item) => {
-      if (item.authOnly && !authUser) {
+  const path = useMemo(() => {
+    return BasePath.filter((path) => {
+      if (path.authOnly && !authUser) {
         return false;
       }
-      if (item.guestOnly && authUser) {
+      if (path.guestOnly && authUser) {
         return false;
       }
       return true;
@@ -89,19 +89,19 @@ function Sidebar() {
   return (
     <aside className="hidden h-screen w-20 flex-col items-center justify-center py-8 md:flex">
       <nav className="flex flex-col items-center gap-4">
-        {items.map((item) => {
-          const isActive = location.pathname === item.path;
+        {path.map((path) => {
+          const isActive = location.pathname === path.path;
           return (
             <button
-              key={item.id}
+              key={path.id}
               type="button"
-              onClick={() => navigate(item.path)}
+              onClick={() => navigate(path.path)}
               className={`inline-flex h-14 w-14 items-center justify-center rounded-2xl transition duration-200 ease-out ${
                 isActive
                   ? "bg-white/20 text-white shadow-[0_12px_24px_rgba(15,23,42,0.35)]"
                   : "bg-transparent text-white/60 hover:bg-white/10 hover:text-white"
               }`}
-              aria-label={item.label}
+              aria-label={path.label}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -113,7 +113,7 @@ function Sidebar() {
                 }`}
                 aria-hidden
               >
-                {item.icon}
+                {path.icon}
               </svg>
             </button>
           );

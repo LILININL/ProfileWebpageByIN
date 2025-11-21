@@ -9,7 +9,7 @@ const normalizeApiBaseUrl = (url) => {
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
   return `https://${trimmed}`;
 };
-//
+
 export const API_BASE_URL = normalizeApiBaseUrl(rawApiBaseUrl);
 
 const ensureLeadingSlash = rawBasePathApi.startsWith("/")
