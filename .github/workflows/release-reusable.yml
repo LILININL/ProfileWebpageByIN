@@ -55,6 +55,12 @@ jobs:
           VITE_APP_VERSION: ${{ steps.version.outputs.TAG }}
         run: npm run build
 
+      - name: Upload dist as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vite-build-release
+          path: dist
+
       - name: Generate changelog
         id: changelog
         run: |
