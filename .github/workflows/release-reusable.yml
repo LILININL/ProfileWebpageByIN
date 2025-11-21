@@ -68,10 +68,10 @@ jobs:
             echo
             git log -1 --pretty=format:'%s%n%n%b'
             echo
-          echo "---"
-          echo
-          echo "Deployed page:"
-          echo "https://whylin.xyz/"
+            echo "---"
+            echo
+            echo "Deployed page:"
+            echo "https://whylin.xyz/"
           } > CHANGELOG.md
 
       - name: Create GitHub Release
